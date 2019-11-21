@@ -56,12 +56,12 @@ class QTestUpdater {
                 logger.error("Unable to get QTest testCase.")
                 return
             }
-            logger.info("TEST_CASE:\n" + qTestTestCase.dump())
+            logger.debug("TEST_CASE:\n" + qTestTestCase.dump())
             def parentModuleId = qTestTestCase.parent_id
             /* check by parentId whether parent package structure was already uploaded from QTest,
                previously uploaded structures are stored in map, where key - id of lowest folder in hierarchy */
             Map testModulesSubHierarchy = testModuleHierarchiesMap.get(parentModuleId)
-            logger.info("EXISTING_HIERARCHY:\n" + testModulesSubHierarchy)
+            logger.debug("EXISTING_HIERARCHY:\n" + testModulesSubHierarchy)
             /* if no such value in the map, uploading it via http calls to QTest */
             if (testModulesSubHierarchy == null) {
                 testModulesSubHierarchy = getParentModulesMap(parentModuleId, projectId)
@@ -69,13 +69,11 @@ class QTestUpdater {
             if (testModulesSubHierarchy.size() > 0) {
                 /* Use lowest in hierarchy folder as a key */
                 def firstMapEntry = testModulesSubHierarchy.entrySet().iterator().next()
-                logger.info("FIRST_MAP_ENTRY:\n" + firstMapEntry)
                 /* put new hierarchy only if there is no such in the map */
                 testModuleHierarchiesMap.putIfAbsent(firstMapEntry.getKey(), testModulesSubHierarchy)
             }
             /* Upload subhierarchy of test cycles stored under parent cycle */
             def testRunsSubHierarchy = qTestClient.getTestRunsSubHierarchy(projectId, rootTestCycleId)
-            logger.info("TEST_RUNS_SUBHIERARCHY:\n" + testRunsSubHierarchy)
             /* Get or create lowest in hierarchy testCycle to write results in there */
             def currentTestCycleId = getCurrentTestCycleId(testRunsSubHierarchy, testModulesSubHierarchy, rootTestCycleId, projectId)
             def suite = getOrAddTestSuite(projectId, currentTestCycleId, env)
@@ -101,20 +99,20 @@ class QTestUpdater {
     }
 
     private def getCurrentTestCycleId(testRunsSubHierarchy, testModulesSubHierarchy, rootTestCycleId, projectId) {
-        logger.info("TEST_RUNS_SUBHIERARCHY_CHILDREN:\n" + testRunsSubHierarchy.children)
-        logger.info("TEST_MODULES_SUBHIERARCHY:\n" + testModulesSubHierarchy)
+        logger.debug("TEST_RUNS_SUBHIERARCHY_CHILDREN:\n" + testRunsSubHierarchy.children)
+        logger.debug("TEST_MODULES_SUBHIERARCHY:\n" + testModulesSubHierarchy)
         // Get upper level of test cycles from test runs hierarchy
         List presentInSubHierarchyTestCycles = testRunsSubHierarchy.children
         // Set root hierarchy folder to start search from
         def currentTestCycleId = rootTestCycleId
         def presentTestCycle
         testModulesSubHierarchy.reverseEach { key, val ->
-            logger.info("CYCLE_TO_FIND\n" + val)
+            logger.debug("CYCLE_TO_FIND\n" + val)
             // Search for upper-level test cycle folder among already present
             presentTestCycle = presentInSubHierarchyTestCycles.find {
                 it.name.equals(val)
             }
-            logger.info("CURRENT_CYCLE\n" + presentTestCycle)
+            logger.debug("CURRENT_CYCLE\n" + presentTestCycle)
             // If corresponding to module cycle wasn't found, create one
             if (presentTestCycle == null) {
                 def createdTestCycle = qTestClient.addTestCycle(projectId, currentTestCycleId, val)
@@ -125,8 +123,8 @@ class QTestUpdater {
                 presentInSubHierarchyTestCycles = presentTestCycle.children
                 currentTestCycleId = presentTestCycle.id
             }
-            logger.info("PRESENT_TEST_CYCLE:\n" + presentTestCycle)
-            logger.info("PRESENT_IN_SUB_HIERARCHY_CYCLES:\n" + presentInSubHierarchyTestCycles)
+            logger.debug("PRESENT_TEST_CYCLE:\n" + presentTestCycle)
+            logger.debug("PRESENT_IN_SUB_HIERARCHY_CYCLES:\n" + presentInSubHierarchyTestCycles)
         }
         return currentTestCycleId
     }
