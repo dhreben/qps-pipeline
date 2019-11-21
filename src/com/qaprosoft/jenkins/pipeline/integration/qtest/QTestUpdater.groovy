@@ -47,6 +47,7 @@ class QTestUpdater {
         }
         /* Upload subhierarchy of test cycles stored under parent cycle */
         def testRunsSubHierarchy = qTestClient.getTestRunsSubHierarchy(projectId, rootTestCycleId)
+        logger.info("TEST_RUNS_SUBHIERARCHY:\n" + testRunsSubHierarchy)
         /* Create map to store already extracted from zafira module hierarchies */
         Map<Object, Map> testModuleHierarchiesMap = new HashMap()
         testCasesMap.values().each { zafiraTestCase ->
@@ -123,6 +124,8 @@ class QTestUpdater {
                 presentInSubHierarchyTestCycles = presentTestCycle.children
                 currentTestCycleId = presentTestCycle.id
             }
+            logger.info("PRESENT_TEST_CYCLE:\n" + presentTestCycle)
+            logger.info("PRESENT_IN_SUB_HIERARCHY_CYCLES:\n" + presentInSubHierarchyTestCycles)
         }
         return currentTestCycleId
     }
