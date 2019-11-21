@@ -99,7 +99,6 @@ class QTestUpdater {
     }
 
     private def getCurrentTestCycleId(testRunsSubHierarchy, testModulesSubHierarchy, rootTestCycleId, projectId) {
-        logger.info("TEST_RUNS_SUBHIERARCHY:\n" + testRunsSubHierarchy)
         logger.info("TEST_RUNS_SUBHIERARCHY_CHILDREN:\n" + testRunsSubHierarchy.children)
         logger.info("TEST_MODULES_SUBHIERARCHY:\n" + testModulesSubHierarchy)
         // Get upper level of test cycles from test runs hierarchy
@@ -108,10 +107,12 @@ class QTestUpdater {
         def currentTestCycleId = rootTestCycleId
         def presentTestCycle
         testModulesSubHierarchy.reverseEach { key, val ->
+            logger.info("CYCLE_TO_FIND\n" + val)
             // Search for upper-level test cycle folder among already present
             presentTestCycle = presentInSubHierarchyTestCycles.find {
                 it.name.equals(val)
             }
+            logger.info("CURRENT_CYCLE\n" + presentTestCycle)
             // If corresponding to module cycle wasn't found, create one
             if (presentTestCycle == null) {
                 def createdTestCycle = qTestClient.addTestCycle(projectId, currentTestCycleId, val)
