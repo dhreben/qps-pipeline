@@ -45,9 +45,7 @@ class QTestUpdater {
         if (projectId.toInteger() == 10) {
             rootTestCycleId = getSubCycleId(rootTestCycleId, projectId)
         }
-        /* Upload subhierarchy of test cycles stored under parent cycle */
-        def testRunsSubHierarchy = qTestClient.getTestRunsSubHierarchy(projectId, rootTestCycleId)
-        logger.info("TEST_RUNS_SUBHIERARCHY:\n" + testRunsSubHierarchy)
+
         /* Create map to store already extracted from zafira module hierarchies */
         Map<Object, Map> testModuleHierarchiesMap = new HashMap()
         testCasesMap.values().each { zafiraTestCase ->
@@ -75,6 +73,9 @@ class QTestUpdater {
                 /* put new hierarchy only if there is no such in the map */
                 testModuleHierarchiesMap.putIfAbsent(firstMapEntry.getKey(), testModulesSubHierarchy)
             }
+            /* Upload subhierarchy of test cycles stored under parent cycle */
+            def testRunsSubHierarchy = qTestClient.getTestRunsSubHierarchy(projectId, rootTestCycleId)
+            logger.info("TEST_RUNS_SUBHIERARCHY:\n" + testRunsSubHierarchy)
             /* Get or create lowest in hierarchy testCycle to write results in there */
             def currentTestCycleId = getCurrentTestCycleId(testRunsSubHierarchy, testModulesSubHierarchy, rootTestCycleId, projectId)
             def suite = getOrAddTestSuite(projectId, currentTestCycleId, env)
