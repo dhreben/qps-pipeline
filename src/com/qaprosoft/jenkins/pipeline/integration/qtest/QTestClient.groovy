@@ -64,13 +64,13 @@ class QTestClient extends HttpClient {
         }
     }
 
-    public def getTestRunsSubHierarchy(projectId) {
+    public def getTestRunsSubHierarchy(projectId, rootTestCycleId) {
         context.withCredentials([context.string(credentialsId:'qtest_token', variable: 'TOKEN')]) {
             def parameters = [customHeaders: [[name: 'Authorization', value: "bearer ${context.env.TOKEN}"]],
                               contentType: 'APPLICATION_JSON',
                               httpMode: 'GET',
                               validResponseCodes: "200",
-                              url: this.serviceURL + "projects/${projectId}/test-runs/subhierarchy"]
+                              url: this.serviceURL + "projects/${projectId}/test-runs/subhierarchy?parentId=${rootTestCycleId}&parentType=test-cycle"]
             return sendRequestFormatted(parameters)
         }
     }
