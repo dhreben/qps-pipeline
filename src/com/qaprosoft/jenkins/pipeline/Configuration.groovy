@@ -165,6 +165,7 @@ public class Configuration {
         parseValues(params.get(CAPABILITIES), ";", CAPABILITIES)
         
         //4. Replace vars and/or params with zafiraFields values
+        context.println params.get("zafiraFields")
         parseValues(params.get("zafiraFields"))
         //5. Replace vars and/or params with overrideFields values
         parseValues(params.get("overrideFields"))
